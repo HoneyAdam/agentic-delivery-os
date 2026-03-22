@@ -54,7 +54,8 @@ Detail: [doc/guides/change-lifecycle.md](doc/guides/change-lifecycle.md)
 - `editor` — content rewrites and translations
 
 ### Verification
-- `reviewer` — review change vs spec/plan; append remediation if FAIL
+- `review-feedback-applier` — classify and apply accepted review feedback from PR/MR
+- `reviewer` — review changes against spec, plan, code quality heuristics, and repo rules (local + remote modes)
 - `fixer` — reproduce failures and apply targeted fixes
 - `runner` — execute commands, capture logs (subagent)
 
@@ -75,6 +76,7 @@ Full definitions: `.opencode/agent/*.md` | Inventory: [.opencode/README.md](.ope
 
 | Command | Purpose |
 |---------|---------|
+| `/apply-review-feedback` | Classify and apply accepted PR/MR review feedback locally |
 | `/bootstrap` | Scaffold ADOS artifacts for an existing project |
 | `/plan-change` | Interactive planning session (prep context for /write-spec) |
 | `/write-spec <ref>` | Generate change specification |
@@ -83,6 +85,7 @@ Full definitions: `.opencode/agent/*.md` | Inventory: [.opencode/README.md](.ope
 | `/run-plan <ref>` | Execute plan phases |
 | `/review <ref>` | Review change vs spec/plan |
 | `/review-deep <ref>` | Deep review with stronger reasoning model |
+| `/review-remote` | Review open PR/MR diff and optionally publish findings |
 | `/sync-docs <ref>` | Reconcile system docs from a change |
 | `/check` | Run quality gates (no fixes) |
 | `/check-fix` | Run quality gates and fix failures |
@@ -146,7 +149,7 @@ Detail: [doc/guides/unified-change-convention-tracker-agnostic-specification.md]
 │   ├── agent/            # agents (one .md each)
 │   └── command/          # commands (one .md each)
 ├── .ai/
-│   ├── agent/            # PM tracker config (pm-instructions.md)
+│   ├── agent/            # PM tracker config (pm-instructions.md), PR/MR platform config (pr-instructions.md), code-review instructions (incl. checklist)
 │   ├── local/            # git-ignored ephemeral state
 │   └── rules/            # language/tool rules (bash.md)
 ├── scripts/              # repo-internal automation (.sh extension)
@@ -161,7 +164,7 @@ Detail: [doc/guides/unified-change-convention-tracker-agnostic-specification.md]
     ├── overview/             # north star, architecture, glossary
     ├── planning/             # internal planning notes
     ├── spec/                 # current system spec (reconciled after each change)
-    ├── templates/            # document templates (7 templates)
+    ├── templates/            # document templates (8 templates)
     ├── tools/                # CLI tool user guides
     └── documentation-handbook.md
 ```
@@ -191,6 +194,8 @@ Every Markdown file carries a three-line YAML frontmatter: copyright, MIT licens
 | [doc/guides/opencode-agents-and-commands-guide.md](doc/guides/opencode-agents-and-commands-guide.md) | How to use agents and commands (manual + autopilot) |
 | [doc/guides/unified-change-convention-tracker-agnostic-specification.md](doc/guides/unified-change-convention-tracker-agnostic-specification.md) | Change naming convention (workItemRef, folders, branches) |
 | [.ai/agent/pm-instructions.md](.ai/agent/pm-instructions.md) | PM tracker configuration (GitHub/Jira setup) |
+| [.ai/agent/pr-instructions.md](.ai/agent/pr-instructions.md) | PR/MR platform configuration (GitHub/GitLab setup) |
+| [doc/guides/pr-platform-integration.md](doc/guides/pr-platform-integration.md) | PR/MR platform integration guide |
 | [.ai/rules/bash.md](.ai/rules/bash.md) | Bash coding rules |
 | [doc/documentation-handbook.md](doc/documentation-handbook.md) | Documentation layout standard |
 | [doc/tools/text-to-image.md](doc/tools/text-to-image.md) | text-to-image CLI tool user guide and provider setup |

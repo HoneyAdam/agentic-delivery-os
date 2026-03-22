@@ -23,7 +23,7 @@ This agent:
 
 1. Generates `tmp/pr/<branchPath>/description.md` from the current branch diff vs the PR/MR base branch.
 2. Detects GitHub vs GitLab from the `origin` remote.
-3. Creates or updates the PR/MR via `gh` (GitHub) or `glab` (GitLab).
+3. Creates or updates the PR/MR via the platform tooling defined in `.ai/agent/pr-instructions.md`.
 
 Hard rule: NEVER merge. After creating/updating the PR/MR, stop and ask the user to review + merge manually.
 </purpose>
@@ -225,19 +225,15 @@ Body guidance (use only sections that apply; keep it tight):
 - `## Risk & Rollback`
   </output_contract>
 
-<platform_detection>
-Determine platform primarily from `git remote get-url origin` host:
+<platform_access>
+Load PR/MR platform configuration from `.ai/agent/pr-instructions.md`.
+This file is REQUIRED. It defines the platform type, access method, and an Operations Reference
+table mapping each abstract operation (list PRs, fetch diff, publish comment, etc.) to the
+concrete CLI or MCP command. Use it as the single source of truth for all platform interactions.
 
-- `github.com` (or host contains `github`) → GitHub (use `gh`)
-- `gitlab.com` (or host contains `gitlab`) → GitLab (use `glab`)
-
-If still unclear:
-
-- If `gh auth status` succeeds → GitHub
-- Else if `glab auth status` succeeds → GitLab
-
-If still unknown and no override flag is provided: output `NEEDS_INPUT` with an exact rerun suggestion using `--github` or `--gitlab`.
-</platform_detection>
+If `.ai/agent/pr-instructions.md` does not exist: STOP with message:
+"Missing `.ai/agent/pr-instructions.md`. This file is required for platform access. Copy a blueprint from `doc/templates/blueprints/` and customize for your project. See `doc/guides/pr-platform-integration.md` for setup instructions."
+</platform_access>
 
 <process>
   <step id="1">
@@ -266,9 +262,8 @@ If still unknown and no override flag is provided: output `NEEDS_INPUT` with an 
     Hard rule: Do NOT attempt to create or update a PR/MR until the branch exists on the remote with all commits pushed.
   </step>
   <step id="4">
-    Detect platform and verify tooling/auth:
-    - GitHub: require `gh`.
-    - GitLab: require `glab`.
+    Load platform configuration and verify tooling/auth:
+    - Load platform configuration from `.ai/agent/pr-instructions.md`. Verify tooling is installed and authenticated using the "Check auth" operation.
     - JSON parsing: require `jq`.
     If missing/auth fails: stop with a short actionable message.
   </step>
@@ -280,6 +275,7 @@ If still unknown and no override flag is provided: output `NEEDS_INPUT` with an 
   </step>
   <step id="5">
     Mandatory existence check (GATING STEP): locate an existing OPEN PR/MR for the current branch.
+    Use the "List open PRs for branch" operation from the Operations Reference.
 
     This step MUST run successfully before any create attempt.
 
@@ -401,7 +397,8 @@ If still unknown and no override flag is provided: output `NEEDS_INPUT` with an 
     Create `tmp/pr/<branchPath>/body.md` from line 3+ (do not echo content to stdout).
   </step>
   <step id="9">
-    Create or update PR/MR:
+    Create or update PR/MR using the Operations Reference:
+    - "Create PR" / "Update PR" / "View PR (confirm)" operations.
 
     Hard rule:
     - NEVER attempt "create" when `mode=update`.
@@ -425,61 +422,6 @@ If still unknown and no override flag is provided: output `NEEDS_INPUT` with an 
   </step>
   <step id="10">Report: actionTaken (created-new vs updated-existing), platform, base branch, PR/MR URL, and the written file paths under `tmp/pr/<branchPath>/`. Then STOP and ask the user to review and merge manually.</step>
 </process>
-
-<cli_reference>
-Follow the pattern; ignore the specific example content.
-
-GitHub (`gh`):
-
-```bash
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-BRANCH_PATH="$(printf '%s' "$BRANCH" | tr -c 'A-Za-z0-9._/-' '_' | sed 's#\.\.#__#g; s#^/*##')"
-mkdir -p "tmp/pr/$BRANCH_PATH"
-
-TITLE="$(head -n 1 "tmp/pr/$BRANCH_PATH/description.md")"
-tail -n +3 "tmp/pr/$BRANCH_PATH/description.md" > "tmp/pr/$BRANCH_PATH/body.md"
-
-# GATING STEP: find most recently updated OPEN PR for branch.
-PR_JSON="$(gh pr list --head "$BRANCH" --state open --json number,baseRefName,url,updatedAt --jq 'sort_by(.updatedAt) | reverse | .[0]' 2>tmp/gh-pr-list.err)" || { cat tmp/gh-pr-list.err >&2; exit 1; }
-NUMBER="$(printf '%s' "$PR_JSON" | jq -r '.number // empty')"
-
-if [ -z "$NUMBER" ]; then
-  gh pr create --base "$BASE" --title "$TITLE" --body-file "tmp/pr/$BRANCH_PATH/body.md" || exit 1
-  NUMBER="$(gh pr list --head "$BRANCH" --state open --json number,updatedAt --jq 'sort_by(.updatedAt) | reverse | .[0].number' 2>/dev/null)"
-fi
-
-gh pr edit "$NUMBER" --base "$BASE" --title "$TITLE" --body-file "tmp/pr/$BRANCH_PATH/body.md"
-gh pr view "$NUMBER" --json number,baseRefName,url --jq '{number,baseRefName,url}'
-```
-
-GitLab (`glab`):
-
-```bash
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-BRANCH_PATH="$(printf '%s' "$BRANCH" | tr -c 'A-Za-z0-9._/-' '_' | sed 's#\.\.#__#g; s#^/*##')"
-mkdir -p "tmp/pr/$BRANCH_PATH"
-
-TITLE="$(head -n 1 "tmp/pr/$BRANCH_PATH/description.md")"
-tail -n +3 "tmp/pr/$BRANCH_PATH/description.md" > "tmp/pr/$BRANCH_PATH/body.md"
-
-# GATING STEP: list MRs for source branch; pick most recently updated.
-MR_LIST_JSON="$(glab mr list --source-branch "$BRANCH" --output json 2>tmp/glab-mr-list.err)" || { cat tmp/glab-mr-list.err >&2; exit 1; }
-MR_JSON="$(printf '%s' "$MR_LIST_JSON" | jq 'sort_by(.updated_at // .updatedAt // "") | reverse | .[0]')"
-IID="$(printf '%s' "$MR_JSON" | jq -r '.iid // empty')"
-
-if [ -z "$IID" ]; then
-  glab mr create --source-branch "$BRANCH" --target-branch "$BASE" --title "$TITLE" --description "$(cat "tmp/pr/$BRANCH_PATH/body.md")" --yes || exit 1
-  MR_LIST_JSON="$(glab mr list --source-branch "$BRANCH" --output json 2>/dev/null)" || exit 1
-  IID="$(printf '%s' "$MR_LIST_JSON" | jq -r 'sort_by(.updated_at // "") | reverse | .[0].iid // empty')"
-fi
-
-glab mr update "$IID" --target-branch "$BASE" --title "$TITLE" --description "$(cat "tmp/pr/$BRANCH_PATH/body.md")" --yes
-MR_VIEW_JSON="$(glab mr view "$IID" --output json)" || exit 1
-WEB_URL="$(printf '%s' "$MR_VIEW_JSON" | jq -r '.web_url')"
-TARGET_BRANCH="$(printf '%s' "$MR_VIEW_JSON" | jq -r '.target_branch')"
-```
-
-</cli_reference>
 
 <constraints>
   <rule>Never merge, approve, or close the PR/MR.</rule>
