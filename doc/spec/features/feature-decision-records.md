@@ -49,7 +49,7 @@ ADOS provides a tracker-agnostic standard for recording and managing significant
 
 ### Capabilities
 
-- **Structured authoring (F-1):** Template with front-matter skeleton and required sections (Context, Problem Framing, Decision Drivers, Alternatives, Decision, Consequences, Verification Criteria).
+- **Structured authoring (F-1):** Template with front-matter skeleton and required sections (Context, Problem Framing, Constraints (Hard Requirements), Decision Drivers, Alternatives, Decision, Consequences, Verification Criteria).
 - **Optional extended metadata (F-7):** `decision_area`, `decision_scope`, `reversibility`, `review_date`, `business_impact`, `customer_impact`, and optional links to experiments/metrics/roadmap items.
 - **Compatibility (F-8):** ADR/TDR usage remains valid without extended fields.
 - **Lifecycle management (F-2):** Status transitions from Proposed → Under Review → Accepted → (Deprecated | Superseded).
@@ -148,14 +148,19 @@ links:
 
 1. Title (`# <TYPE>-<zeroPad4>: <Title>`)
 2. Context
-3. Problem Framing
-4. Decision Drivers
-5. Alternatives Considered (at least 2 options + do-nothing baseline)
-6. Decision
-7. Consequences (positive, negative, unresolved)
-8. Verification Criteria
-9. Status
-10. References
+3. Problem Framing (Clarified)
+4. Constraints (Hard Requirements)
+5. Decision Drivers
+6. Mental Models & Techniques Used
+7. Alternatives Considered (at least 2 options + do-nothing baseline; each alternative includes a constraint-compliance evaluation)
+8. Decision (with constraint-compliance attestation or, for negotiable constraints, a documented accepted-risk exception)
+9. Trade-offs & Consequences (positive outcomes, negative outcomes, unresolved questions)
+10. Implementation Plan
+11. Verification Criteria
+12. Confidence Rating
+13. Lessons Learned (Retrospective)
+14. Examples & Usage (Optional)
+15. References
 
 ## Non-Functional Requirements
 
