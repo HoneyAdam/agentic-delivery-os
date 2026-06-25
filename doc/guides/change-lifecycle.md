@@ -34,6 +34,12 @@ Inside the change folder `doc/changes/YYYY-MM/YYYY-MM-DD--<workItemRef>--<slug>/
 | `chg-<workItemRef>-pm-notes.yaml` | PM progress tracking, decisions, open questions (git-committed for traceability) | **Yes** |
 | `chg-<workItemRef>-notes.md` | Free-form notes, experiments, links | No |
 
+**Optional artifacts (produced when warranted):**
+
+| Artifact | Purpose | When |
+|----------|---------|------|
+| `doc/decisions/<TYPE>-<zeroPad4>-<slug>.md` | Decision record for a major decision arising during the change | When a hard-to-reverse, precedent-setting, or cross-component decision is needed (typically during specification or delivery) |
+
 ## Change Phases (PM-controlled)
 
 Phases are ordered and gated. A phase is not complete unless its artifacts exist and are consistent.
@@ -119,6 +125,8 @@ flowchart TD
 
 - `@pm` delegates to `@spec-writer` with `workItemRef` and planning summary.
 - `@spec-writer` creates or updates `chg-<workItemRef>-spec.md`.
+- **Major decisions**: If the spec surfaces a hard-to-reverse, precedent-setting, or cross-component decision, delegate to `@decision-advisor` to produce a decision record (`doc/decisions/<TYPE>-<zeroPad4>-<slug>.md`) before proceeding. Major decisions are best resolved before implementation begins.
+- **Minor decisions**: For routine/reversible choices (R0/R1), consult `@decision-advisor` for quick sparring even if no record is produced — the advisor is available throughout the lifecycle, not only for record-worthy decisions.
 
 **Outcome**: A complete spec with problem statement, goals, scope, acceptance criteria, and definition of done.
 
@@ -174,7 +182,7 @@ flowchart TD
 - `@pm` invokes `@coder` (via `/run-plan <workItemRef> execute all remaining phases no review`).
 - `@coder` executes all plan phases, delegating to:
   - `@designer` for UI/UX work
-  - `@architect` for technical/architectural decisions
+  - `@decision-advisor` for decisions (any type)
   - `@committer` for checkpointing progress
   - `@runner` for heavy command execution (full builds, full test suites)
 
@@ -344,7 +352,7 @@ notes: [] # { text, type, date }
 | 2. specification | `@spec-writer` | — |
 | 3. test_planning | `@test-plan-writer` | — |
 | 4. delivery_planning | `@plan-writer` | — |
-| 5. delivery | `@coder` | `@designer`, `@architect`, `@committer`, `@runner` |
+| 5. delivery | `@coder` | `@designer`, `@decision-advisor`, `@committer`, `@runner` |
 | 6. system_spec_update | `@doc-syncer` | — |
 | 7. review_fix | `@reviewer` | `@coder` |
 | 8. quality_gates | `@runner` | `@fixer` |

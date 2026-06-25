@@ -38,7 +38,10 @@ Detail: [doc/guides/change-lifecycle.md](doc/guides/change-lifecycle.md)
 
 ### Orchestration
 - `pm` — orchestrate changes; manage tickets via MCP; never implements code
-- `architect` — architecture decisions and decision record authoring (ADR/PDR/TDR/BDR/ODR)
+- `decision-advisor` — decisions of all types (architecture, product, business, technical, operating); decision record authoring (ADR/PDR/TDR/BDR/ODR) _(formerly `architect`)_
+
+### Decision review
+- `decision-critic` — independent, read-only decision challenger; tri-state verdict (PASS / PASS_WITH_RISKS / REWORK)
 
 ### Onboarding
 - `bootstrapper` — automate ADOS adoption for existing projects
@@ -49,7 +52,7 @@ Detail: [doc/guides/change-lifecycle.md](doc/guides/change-lifecycle.md)
 - `test-plan-writer` — author test plans with traceable coverage
 
 ### Implementation
-- `coder` — execute plan phases; delegates to `@designer`, `@architect`, `@committer`, `@runner`
+- `coder` — execute plan phases; delegates to `@designer`, `@decision-advisor`, `@committer`, `@runner`
 - `designer` — visual design and UI implementation
 - `editor` — content rewrites and translations
 
@@ -92,8 +95,9 @@ Full definitions: `.opencode/agent/*.md` | Inventory: [.opencode/README.md](.ope
 | `/check-fix` | Run quality gates and fix failures |
 | `/commit` | Create one Conventional Commit |
 | `/pr` | Create/update PR/MR |
-| `/plan-decision` | Interactive architecture decision session |
+| `/plan-decision` | Interactive decision session (any type: architecture, product, business, technical, operating) |
 | `/write-decision` | Generate Decision Record (ADR/PDR/TDR/BDR/ODR) |
+| `/review-decision` | Independent decision challenge (delegates to `@decision-critic`) |
 | `/design` | Generate/update visual design assets |
 
 Full definitions: `.opencode/command/*.md`
@@ -276,6 +280,7 @@ scripts/add-header-location.sh doc/guides
 | [doc/guides/opencode-agents-and-commands-guide.md](doc/guides/opencode-agents-and-commands-guide.md) | How to use agents and commands (manual + autopilot) |
 | [doc/guides/unified-change-convention-tracker-agnostic-specification.md](doc/guides/unified-change-convention-tracker-agnostic-specification.md) | Change naming convention (workItemRef, folders, branches) |
 | [.ai/agent/pm-instructions.md](.ai/agent/pm-instructions.md) | PM tracker configuration (GitHub/Jira setup) |
+| [.ai/agent/decision-instructions.md](.ai/agent/decision-instructions.md) | Project-local decision configuration (tracking conventions + strategic context) |
 | [.ai/agent/pr-instructions.md](.ai/agent/pr-instructions.md) | PR/MR platform configuration (GitHub/GitLab setup) |
 | [doc/guides/pr-platform-integration.md](doc/guides/pr-platform-integration.md) | PR/MR platform integration guide |
 | [.ai/rules/bash.md](.ai/rules/bash.md) | Bash coding rules |
