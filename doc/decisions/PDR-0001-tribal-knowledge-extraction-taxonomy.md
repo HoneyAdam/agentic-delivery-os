@@ -2,9 +2,9 @@
 ados_distribution: internal
 id: PDR-0001
 decision_type: pdr
-status: Proposed
+status: Accepted
 created: 2026-06-27
-decision_date: null
+decision_date: 2026-06-27
 last_updated: 2026-06-27
 summary: "Fix the 5-category tribal-knowledge taxonomy, the category-to-graduation-home mapping, contradiction handling, the confidence rubric, and source-pointer/dedup rules for the bootstrapper Phase-0 PRODUCE step (GH-72)."
 owners:
