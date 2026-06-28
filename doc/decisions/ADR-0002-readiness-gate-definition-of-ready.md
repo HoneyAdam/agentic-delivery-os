@@ -1,10 +1,10 @@
 ---
 id: ADR-0002
 decision_type: adr
-status: Proposed
+status: Accepted
 created: 2026-06-27
-decision_date: null
-last_updated: 2026-06-27
+decision_date: 2026-06-28
+last_updated: 2026-06-28
 summary: "Add a Definition of Ready gate (@readiness-reviewer + /check-readiness + dor_check phase) that adversarially critiques change artifacts against the source ticket before delivery; prompt-as-source DoR; hard gate + recorded override."
 owners:
   - "Juliusz Ćwiąkalski"
@@ -28,7 +28,7 @@ classification:
   recurrence: one-off
 governance:
   driver: "@decision-advisor"
-  decider: null
+  decider: "Juliusz Ćwiąkalski"
   contributors:
     - "Juliusz Ćwiąkalski (author)"
   reviewers: []
@@ -42,7 +42,7 @@ ai_assistance:
   roles: [analyst, record-writer]
   external_data_shared: false
   citations_verified: true
-  human_decider: null
+  human_decider: "Juliusz Ćwiąkalski"
   reviewers: []
 revisit_triggers:
   - "A DoR facet proves to need deep specialization, prompting a split-out critic (the single-critic choice is reversible by design)"
