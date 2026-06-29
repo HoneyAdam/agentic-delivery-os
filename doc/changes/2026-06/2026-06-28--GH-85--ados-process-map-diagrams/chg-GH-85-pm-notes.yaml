@@ -1,0 +1,52 @@
+change_id: GH-85
+title: "ADOS processes map + per-guide diagrams (DX: reduce time to AHA moment)"
+branch: docs/GH-85/ados-process-map-diagrams
+slug: ados-process-map-diagrams
+phases:
+  clarify_scope: { started: "2026-06-28T10:00:00Z", completed: "2026-06-28T10:30:00Z" }
+  specification: { started: "2026-06-28T10:31:00Z", completed: "2026-06-28T11:20:00Z", reopened: "2026-06-28T11:00:00Z", reopened_reason: "red-team R1 (n3/m2/AC-canonical/m6/a11y/OQ-5)" }
+  test_planning: { started: "2026-06-28T10:31:00Z", completed: "2026-06-28T11:20:00Z", reopened: "2026-06-28T11:00:00Z", reopened_reason: "red-team R1 (M1/M3/m1/m3/m7/a11y)" }
+  delivery_planning: { started: "2026-06-28T10:31:00Z", completed: "2026-06-28T11:20:00Z", reopened: "2026-06-28T11:00:00Z", reopened_reason: "red-team R1 (M1/M2/m2/m3/m4/m6/n1/a11y)" }
+  dor_check: { started: "2026-06-28T11:25:00Z", completed: "2026-06-28T11:30:00Z", verdict: "READY" }
+  delivery: { started: "2026-06-28T11:31:00Z", completed: "2026-06-28T12:10:00Z" }
+  system_spec_update: { started: "2026-06-28T12:11:00Z", completed: "2026-06-28T12:20:00Z", result: "NO-OP (docs-only, NG-4 honored); spec_coverage_gaps=[]" }
+  review_fix: { started: "2026-06-28T12:11:00Z", completed: "2026-06-28T12:25:00Z", verdict: "PASS", iterations: 1, reopened: "2026-06-28T13:00:00Z", reopened_reason: "red-team R2 (F1/F2/F3/M1)" }
+  quality_gates: { started: "2026-06-28T13:30:00Z", completed: "2026-06-28T13:40:00Z", result: "GREEN — all code/repo gates pass; doc-distribution no drift (76 docs); 4 e2e-provider failures are external API (HuggingFace/BFL), unrelated to docs change" }
+  dod_check: { started: "2026-06-28T13:40:00Z", completed: "2026-06-28T13:45:00Z", result: "PASS — all 11 phases recorded; 13/13 AC satisfied (reviewer PASS w/ evidence); all plan tasks checked; scope clean (docs-only)" }
+  pr_creation: { started: "2026-06-28T13:46:00Z", completed: "2026-06-28T13:50:00Z", url: "https://github.com/juliusz-cwiakalski/agentic-delivery-os/pull/87" }
+decisions:
+  - text: "README Mermaid 'clickable links to guides' AC satisfied via adjacent markdown link table/legend immediately under the diagram. GitHub's Mermaid iframe sandbox blocks node click-callbacks (<click> + <a> in node labels do not render reliably), so node-clickability is not achievable; an adjacent link block is the GitHub-native way to give one-click access to each guide."
+    date: 2026-06-28
+  - text: "Research recommended a rendered PNG/SVG hero in README for max rendering reliability, but issue Non-goals explicitly forbid rendered image assets (Mermaid only). Human constraint wins — no PNG/SVG. Diagrams are Mermaid throughout."
+    date: 2026-06-28
+  - text: "Scope kept tightly to issue AC (process map + per-guide diagrams + navigation + consistency). Research surfaced broader README improvements (badges, 'who is this for', hero rework) that would further the adoption goal, but those are out of scope here — no AC for them, and expanding risks scope creep. Surfaced as a follow-up suggestion to the human, not invented scope."
+    date: 2026-06-28
+  - text: "New canonical guide named doc/guides/ados-processes.md per issue scope #1 (research informally suggested 'process-map.md'; the issue's explicit name is authoritative)."
+    date: 2026-06-28
+open_questions: []
+blockers: []
+notes:
+  - text: "PR #87 remote review (GitHub Copilot): 5 comments, 4 valid + 1 false positive. Valid (applied): (1) onboarding diagram 'Mandatory artifacts' node used bare filenames — fixed to canonical paths .ai/agent/pm-instructions.md + doc/documentation-handbook.md; (2)(3) test-plan §2 + §3.1 stale commentary claimed the plan 'still uses a flat AC-1..AC-12 scheme' / 'map by intent' — plan was reconciled, so retired the hedge; (4) OQ-5 closed (spec AC-NFR4-1 now enumerates README.md). False positive: Copilot claimed the test-plan header uses 'www.x.com' — the header actually reads https://x.com/cwiakalski (correct); no fix. Gates re-run GREEN (doc-distribution no drift; git diff --check clean)."
+    type: info
+    date: 2026-06-28
+  - text: "RETRO (red-team R2 reopened review_fix): @red-team-coordinator R2 (post-delivery) verdict SHIP-WITH-FINDINGS. 13 AC satisfied, scope immaculate, no Critical. 4 must-fix-before-PR quality items: F1 (change-lifecycle.md L61 '@' inside ((...)) is a Mermaid parse hazard per mmdc 11.15.0 — pre-existing, byte-identical to main, but in F-5 scope; quote the label); F2 (decision-making.md Legend claims blue kernel nodes that are unstyled); F3 (meeting-prep Legend claims blue steps that are unstyled); M1 (README 'six processes' vs 5-row link table — add 6th pointer). Root cause: the @coder styled only 'special' nodes (start/gate/escape/reopen) and left 'ordinary' nodes default, then wrote Legends describing an all-blue palette (learned from the onboarding gold standard where every node is styled). Why not caught earlier: phase-8 reviewer flagged the decision-making instance as a cosmetic nit but missed meeting-prep (same defect) and didn't escalate Legend/diagram factual mismatch to Major. Process improvement: the consistency-review AC (F5-1) should explicitly verify 'Legend text matches actual rendered node styling' as a check, not just 'shared palette exists'. F1 is a pre-existing fragility the F-5 scope legitimitely covers. PM decisions A1-A4 acknowledged sound."
+    type: retro
+    date: 2026-06-28
+  - text: "RETRO (red-team R1 reopened artifacts): @red-team-coordinator R1 verdict SHIP-WITH-FINDINGS. Substance sound; 3 must-fix traceability/hygiene defects found (M1: spec/plan/test-plan disagree on AC numbering — plan AC-6='link table' vs test AC-6='meeting diagram' collision; M2: plan task 1.1 hedge lets AI hand-write headers, violating AGENTS.md; M3: test-plan stale vs landed spec — OQ-1/OQ-4 resolved-but-still-open, NFR-1..6 not reconciled). Root cause: parallel authoring never reconciled. Why not caught earlier: AC numbering was left to each author independently without a post-authoring reconciliation pass. Process improvement: for parallel-authored artifact sets, run an explicit cross-artifact AC/NFR reconciliation step (or single canonical scheme upfront) before DoR. Reopened spec/test-plan/plan to fold in fixes + cheap nice-to-haves (m2: 5 existing fences not 3; m3: pick one 'near top' threshold; m4: TOC interaction; m6: decision diagram render-risk; n1/n3; a11y legend). PM decisions A1-A4 acknowledged sound, not defects."
+    type: retro
+    date: 2026-06-28
+  - text: "clarify_scope complete. Cross-checked issue vs system spec + existing guides. No blocking gaps. Issue is detailed and self-consistent; all 5 referenced process guides exist. 3 of 5 currently lack Mermaid diagrams (meeting-prep, decision-making, onboarding-existing-project). README has hero image already but no process-map Mermaid. Existing diagram styles documented for consistency: change-lifecycle uses flowchart TD + subgraphs + <br/> multiline + dashed feedback loops + Legend; project-inception uses flowchart TB + quoted labels + style color fills + convergence diamonds."
+    type: info
+    date: 2026-06-28
+  - text: "@external-researcher delivered a comprehensive report on README/adoption/AHA best practices (Bun, Astro, Aider exemplars; GitHub Mermaid rendering mechanics; adoption funnel; anti-patterns). Key applied insights: left-to-right pipeline with agent ownership visible per node, gates as diamonds, color-code by stage, keep diagram to one screen-width. Report saved in research task output (not committed; summarized in spec brief)."
+    type: info
+    date: 2026-06-28
+  - text: "Two @red-team-coordinator rounds planned per user: R1 on spec/plan/test-plan artifacts pre-delivery, R2 on the delivered change pre-PR. Findings folded into artifacts (R1) / remediated before PR (R2)."
+    type: info
+    date: 2026-06-28
+  - text: "Branch setup hiccup: stale .git/index.lock briefly blocked checkout; resolved (lock cleared, HEAD now on docs/GH-85/ados-process-map-diagrams based on origin/main 1e2e7ff). @runner subagent returned empty outputs twice during diagnosis; PM inspected .git state directly via read tool as fallback."
+    type: retro
+    date: 2026-06-28
+  - text: "Human PR review (PR #87, 3 inline comments) + README world-class pass. Comments 1&2 asked to make Mermaid diagram boxes clickable; verified NOT possible on GitHub (sandboxed Mermaid iframe blocks click callbacks — GitHub community confirms 'content blocked'); delivered GitHub-native equivalent: clickable process names below the diagram + transparent parenthetical note, plus same hint under the guide's master diagram (cards already link to each guide). Comment 3: README table 'Process | filename' was redundant — replaced with clickable name + 1-sentence summary (distinguishes inception/onboarding/change-delivery for newcomers). README de-fluff: consolidated 4 overlapping value-prop sections (Why/What/Benefits/Intention) into 2; trimmed the 20-agent/17-command link-dump to a summary+link (de-noise, drift-proof); fixed stale/inconsistent counts ('19 agents'/'16 commands' in prose + repo-structure tree); synced hand-maintained TOC (removed Benefits/Intention anchors). Scope expanded per human's explicit 'review whole readme, no fluff, as short as possible' instruction."
+    type: info
+    date: 2026-06-29
